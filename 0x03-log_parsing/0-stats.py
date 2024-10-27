@@ -12,8 +12,15 @@ log_count = 0
 
 
 # Define regular expression for log lines
-log_pattern = re.compile(r'(?P<ip>\S+) - \[(?P<date>.+)\] "GET /projects/260 HTTP/1.1" (?P<status>\d+) (?P<size>\d+)')
+log_pattern = re.compile(
+    r'(?P<ip>\S+) - \['
+    r'(?P<date>.+)\] '
+    r'"GET /projects/260 HTTP/1.1" '
+    r'(?P<status>\d+) '
+    r'(?P<size>\d+)'
+)
 valid_status_codes = [200, 301, 400, 401, 403, 404, 405, 500]
+
 
 def print_metrics():
     """ Print the accumulated metrics """
@@ -22,10 +29,12 @@ def print_metrics():
         if status_counts[status] > 0:
             print(f"{status}: {status_counts[status]}")
 
+
 def signal_handler(sig, frame):
     """ Handle signal interrupt """
     print_metrics()
     sys.exit(0)
+
 
 # Set up signal handler for graceful termination
 signal.signal(signal.SIGINT, signal_handler)
