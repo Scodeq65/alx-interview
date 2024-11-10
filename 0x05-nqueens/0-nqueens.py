@@ -1,15 +1,23 @@
 #!/usr/bin/python3
-"""N Queens puzzle"""
+"""N Queens puzzle solver using backtracking."""
+
 import sys
 
 
 def print_usage_and_exit(message):
+    """Prints error message and exits the program with status 1."""
     print(message)
     sys.exit(1)
 
 
 def is_safe(queens, row, col):
-    """Check if placing a queen at (row, col) is safe."""
+    """
+    Checks if placing a queen at (row, col) is safe.
+
+    A queen placement is considered safe if it does not
+    conflict with any other queen in the same column
+    or on the diagonals.
+    """
     for r, c in enumerate(queens):
         if c == col or abs(c - col) == abs(r - row):
             return False
@@ -17,7 +25,13 @@ def is_safe(queens, row, col):
 
 
 def solve_nqueens(N):
-    """Recursive function to solve the N queens problem."""
+    """
+    Solves the N queens problem for an NxN chessboard.
+
+    Returns:
+        List of all possible solutions, where each solution is a list
+        of positions (row, column) of queens.
+    """
     solutions = []
 
     def backtrack(queens):
@@ -34,7 +48,12 @@ def solve_nqueens(N):
 
 
 def main():
-    """Main function to handle input and print solutions."""
+    """
+    Main function to handle input validation and print solutions.
+
+    Takes command-line argument N, validates it, and prints
+    all solutions to the N queens problem.
+    """
     if len(sys.argv) != 2:
         print_usage_and_exit("Usage: nqueens N")
 
