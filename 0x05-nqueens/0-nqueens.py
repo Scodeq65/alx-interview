@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""N Queens puzzle solver using backtracking."""
+"""Module that determine the N queens"""
 
 import sys
 
@@ -18,11 +18,9 @@ def validate_input():
     """
     Validates the command-line input to ensure that N is a valid integer
     greater than or equal to 4.
-
     If the input is invalid:
         - Prints an appropriate error message.
         - Exits the program with status code 1.
-
     Returns:
         int: The value of N if the input is valid.
     """
@@ -48,7 +46,7 @@ def is_safe(queens, row, col):
 
     Args:
         queens (list): The current list of placed queens, where the index
-                       represents the row, and the value at each index
+                       represents the row,and the value at each index
                        represents the column of a queen.
         row (int): The row index to check for placing the queen.
         col (int): The column index to check for placing the queen.
@@ -69,7 +67,7 @@ def solve_n_queens(n):
 
     Args:
         n (int): The size of the chessboard (N x N) and the number of
-                 queens to place.
+                queens to place.
 
     Returns:
         list: A list containing all solutions, where each solution is a list of
@@ -84,10 +82,13 @@ def solve_n_queens(n):
 
         Args:
             queens (list): Current list of queen positions up to
-                           the current row.
+                        the current row.
         """
         row = len(queens)
         if row == n:
+            """ Convert each solution to the required format and
+            add to solutions list
+            """
             solutions.append([[r, c] for r, c in enumerate(queens)])
             return
         for col in range(n):
@@ -95,7 +96,6 @@ def solve_n_queens(n):
                 queens.append(col)  # Place queen
                 backtrack(queens)   # Recurse to place next queen
                 queens.pop()        # Remove queen (backtrack)
-
     backtrack([])
     return solutions
 
