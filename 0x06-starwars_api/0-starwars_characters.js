@@ -19,7 +19,7 @@ const url = `https://swapi-api.alx-tools.com/api/films/${movieId}/`;
 // Make a request to get the movie data
 request(url, (error, response, body) => {
   if (error) {
-    console.error(error);
+    console.error('Error fetching movie data:', error);
     return;
   }
 
@@ -30,13 +30,20 @@ request(url, (error, response, body) => {
     // Fetch each character's name in sequence
     characters.forEach((characterUrl) => {
       request(characterUrl, (error, response, body) => {
-        if (!error && response.statusCode === 200) {
+        if (error) {
+          console.error('Error fetching character data:', error);
+          return;
+        }
+
+        if (response.statusCode === 200) {
           const characterData = JSON.parse(body);
           console.log(characterData.name);
+        } else {
+          console.error('Failed to fetch character data:', response.statusCode);
         }
       });
     });
   } else {
-    console.error(`Error: Could not retrieve movie with ID ${movieId}`);
+    console.error(`Error: Could not retrieve movie with ID ${movieId}, status code: ${response.statusCode}`);
   }
 });
