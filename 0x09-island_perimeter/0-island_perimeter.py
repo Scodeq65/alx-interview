@@ -3,12 +3,14 @@
 Function to calculate the perimeter of an island described in a grid.
 """
 
+
 def island_perimeter(grid):
     """
     Calculates the perimeter of the island in the given grid.
 
     Args:
-        grid (list of list of int): 2D grid where 0 represents water and 1 represents land.
+        grid (list of list of int): 2D grid where 0
+        represents water and 1 represents land.
 
     Returns:
         int: The perimeter of the island.
