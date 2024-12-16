@@ -6,13 +6,15 @@ between Maria and Ben. The winner is the player who forces their
 opponent into a position where they cannot make a move.
 """
 
+
 def isWinner(x, nums):
     """
     Determines the winner of the prime game.
 
     Parameters:
     x (int): Number of rounds to be played.
-    nums (list): List of integers where each integer represents the largest 
+    nums (list): List of integers where each integer
+    represents the largest
                  number in the set for that round.
 
     Returns:
@@ -47,21 +49,28 @@ def isWinner(x, nums):
     # Precompute sets of primes for each number in nums
     prime_sets = {}
     for num in nums:
-        prime_sets[num] = set(primes[:num + 1])
+        prime_sets[num] = set(p for p in primes if p <= num)
 
     maria_wins = 0
     ben_wins = 0
 
     for n in nums:
         """
-        Simulate each round of the game. Maria starts first and players alternate.
+        Simulate each round of the game. Maria starts first
+        and players alternate.
         Current primes represent the remaining valid numbers. A player loses
         if no primes are left to choose.
         """
-        current_primes = prime_sets[n].copy()
+        current_primes = prime_sets.get(n, set()).copy()
+        if not current_primes:  # If no primes exist for this round, Ben wins
+            ben_wins += 1
+            continue
+
         turn = 0  # Maria starts first (turn 0)
 
         while current_primes:
+            if not current_primes:  # Safeguard against empty sets
+                break
             prime = min(current_primes)  # Pick the smallest remaining prime
             # Remove the prime and its multiples from the set
             current_primes -= set(range(prime, n + 1, prime))
