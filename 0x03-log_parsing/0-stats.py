@@ -1,53 +1,68 @@
 #!/usr/bin/python3
-"""A script that reads stdin line by line and computes metrics."""
 import sys
 import signal
-from collections import defaultdict
 
 # Initialize metrics
-total_size = 0
-status_counts = defaultdict(int)
-log_count = 0
-valid_status_codes = [200, 301, 400, 401, 403, 404, 405, 500]
+total_file_size = 0
+status_counts = {
+    200: 0,
+    301: 0,
+    400: 0,
+    401: 0,
+    403: 0,
+    404: 0,
+    405: 0,
+    500: 0
+}
+line_count = 0
 
 
-def print_metrics():
-    """Print the accumulated metrics."""
-    print(f"File size: {total_size}")
+def print_stats():
+    """Print the metrics."""
+    print(f"File size: {total_file_size}")
     for status in sorted(status_counts):
         if status_counts[status] > 0:
             print(f"{status}: {status_counts[status]}")
 
 
 def signal_handler(sig, frame):
-    """Handle signal interrupt."""
-    print_metrics()
+    """Handle keyboard interruption (CTRL + C)."""
+    print_stats()
     sys.exit(0)
 
 
-# Set up signal handler for graceful termination
+# Register signal handler for CTRL + C
 signal.signal(signal.SIGINT, signal_handler)
 
 try:
     for line in sys.stdin:
-        parts = line.split()
-        if len(parts) < 7:
-            continue
-
         try:
-            size = int(parts[-1])
-            status = int(parts[-2])
-            if status in valid_status_codes:
-                total_size += size
-                status_counts[status] += 1
-            log_count += 1
+            line_count += 1
 
-            # Print metrics every 10 lines
-            if log_count % 10 == 0:
-                print_metrics()
-        except ValueError:
+            # Parse the line
+            parts = line.split()
+            if len(parts) < 7:
+                continue
+
+            file_size = int(parts[-1])
+            status_code = int(parts[-2])
+
+            # Update metrics
+            total_file_size += file_size
+            if status_code in status_counts:
+                status_counts[status_code] += 1
+
+            # Print stats every 10 lines
+            if line_count % 10 == 0:
+                print_stats()
+
+        except (ValueError, IndexError):
+            # Skip lines that don't conform to the expected format
             continue
-except Exception as e:
-    print(f"Error processing log: {e}", file=sys.stderr)
-finally:
-    print_metrics()
+
+except KeyboardInterrupt:
+    print_stats()
+    raise
+
+# Print final stats if EOF is reached
+print_stats()
