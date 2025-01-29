@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import sys
-import signal
+import re
 
 # Initialize metrics
 total_file_size = 0
@@ -16,6 +16,10 @@ status_counts = {
 }
 line_count = 0
 
+log_pattern = re.compile(
+    r'^\S+ - \[\S+ \S+\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$'
+)
+
 
 def print_stats():
     """Print the metrics."""
@@ -25,40 +29,23 @@ def print_stats():
             print(f"{status}: {status_counts[status]}")
 
 
-def signal_handler(sig, frame):
-    """Handle keyboard interruption (CTRL + C)."""
-    print_stats()
-    sys.exit(0)
-
-
-# Register signal handler for CTRL + C
-signal.signal(signal.SIGINT, signal_handler)
-
 try:
     for line in sys.stdin:
-        try:
-            line_count += 1
+        match = log_pattern.match(line)
+        if match:
+            status_code = int(match.group(1))
+            file_size = int(match.group(2))
 
-            # Parse the line
-            parts = line.split()
-            if len(parts) < 7:
-                continue
-
-            file_size = int(parts[-1])
-            status_code = int(parts[-2])
-
-            # Update metrics
             total_file_size += file_size
+
             if status_code in status_counts:
                 status_counts[status_code] += 1
 
-            # Print stats every 10 lines
-            if line_count % 10 == 0:
-                print_stats()
+            line_count += 1
 
-        except (ValueError, IndexError):
-            # Skip lines that don't conform to the expected format
-            continue
+        if line_count % 10 == 0:
+            print_stats()
+
 
 except KeyboardInterrupt:
     print_stats()
