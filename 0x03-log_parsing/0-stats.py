@@ -1,39 +1,26 @@
 #!/usr/bin/python3
-"""A script that reads stdin  line by line and
-computes matric
-"""
+"""A script that reads stdin line by line and computes metrics."""
 import sys
-import re
 import signal
-
+from collections import defaultdict
 
 # Initialize metrics
 total_size = 0
-status_counts = {}
+status_counts = defaultdict(int)
 log_count = 0
-
-
-# Define regular expression for log lines
-log_pattern = re.compile(
-    r'(?P<ip>\S+) - \['
-    r'(?P<date>.+)\] '
-    r'"GET /projects/260 HTTP/1.1" '
-    r'(?P<status>\d+) '
-    r'(?P<size>\d+)'
-)
 valid_status_codes = [200, 301, 400, 401, 403, 404, 405, 500]
 
 
 def print_metrics():
-    """ Print the accumulated metrics """
+    """Print the accumulated metrics."""
     print(f"File size: {total_size}")
-    for status in sorted(status_counts.keys()):
+    for status in sorted(status_counts):
         if status_counts[status] > 0:
             print(f"{status}: {status_counts[status]}")
 
 
 def signal_handler(sig, frame):
-    """ Handle signal interrupt """
+    """Handle signal interrupt."""
     print_metrics()
     sys.exit(0)
 
@@ -43,24 +30,23 @@ signal.signal(signal.SIGINT, signal_handler)
 
 try:
     for line in sys.stdin:
-        match = log_pattern.match(line)
-        if match:
-            data = match.groupdict()
-            # Update total file size
-            total_size += int(data['size'])
-            # Update status count
-            status = int(data['status'])
+        parts = line.split()
+        if len(parts) < 7:
+            continue
+
+        try:
+            size = int(parts[-1])
+            status = int(parts[-2])
             if status in valid_status_codes:
-                if status in status_counts:
-                    status_counts[status] += 1
-                else:
-                    status_counts[status] = 1
+                total_size += size
+                status_counts[status] += 1
             log_count += 1
+
             # Print metrics every 10 lines
             if log_count % 10 == 0:
                 print_metrics()
-        else:
-            print(f"Invalid log line: {line.strip()}", file=sys.stderr)
+        except ValueError:
+            continue
 except Exception as e:
     print(f"Error processing log: {e}", file=sys.stderr)
 finally:
