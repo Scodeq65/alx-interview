@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """A script that reads stdin line by line and computes metrics."""
 import sys
-import signal
+import re
 
 # Initialize metrics
 total_file_size = 0
@@ -17,6 +17,10 @@ status_counts = {
 }
 line_count = 0
 
+log_pattern = re.compile(
+    r'^\S+ - \[\S+ \S+\] "GET /projects/260 HTTP/1.1" (\d{3}) (\d+)$'
+)
+
 
 def print_stats():
     """Print the accumulated metrics."""
@@ -26,17 +30,15 @@ def print_stats():
             print(f"{status}: {status_counts[status]}")
 
 
-def signal_handler(sig, frame):
-    """Handle keyboard interruption (CTRL + C)."""
-    print_stats()
-    sys.exit(0)
-
-
-# Register signal handler for CTRL + C
-signal.signal(signal.SIGINT, signal_handler)
-
 try:
     for line in sys.stdin:
+        match = log_pattern.match(line)
+        if match:
+            status_code = int(match.group(1))
+            file_size = int(match.group(2))
+
+            total_file_size += file_size
+
         try:
             parts = line.strip().split()
             if len(parts) < 7:
@@ -49,6 +51,10 @@ try:
             if status_code in status_counts:
                 status_counts[status_code] += 1
 
+            line_count += 1
+
+        if line_count % 10 == 0:
+            print_stats()
             line_count += 1
 
             # Print stats every 10 lines
