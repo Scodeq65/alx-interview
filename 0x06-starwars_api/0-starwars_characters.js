@@ -14,7 +14,7 @@ if (!movieId) {
 }
 
 // API URL to retrieve movie information
-const url = `https://swapi-api.alx-tools.com/api/films/${movieId}/`;
+const url = `https://swapi-api.hbtn.io/api/films/${movieId}/`;
 
 // Make a request to get the movie data
 request(url, (error, response, body) => {
